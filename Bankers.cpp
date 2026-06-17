@@ -119,6 +119,128 @@ void calculateneed(){
 }
 
 
+void safechecker(int x){   
+    
+    process *temp;
+    resource *sum = NULL;
+    resource *tempr;
+    resource *needlistptr;
+    resource *allocateptr;
+    resource *totalptr;
+    resource *sumptr;
+    resource *availableptr;
+    
+    bool found;
+    
+    
+    for(int i =0; i<x; i++){
+        temp = plist;
+        tempr = new resource;
+        tempr->next = NULL;
+        tempr->amount = 0;
+        while(temp!=NULL){
+            allocateptr = temp->allocatedlist;
+            for(int j = 0; j<i;j++){
+                allocateptr = allocateptr->next;
+            }
+            tempr->amount += allocateptr->amount;
+            temp = temp->next;
+        }
+        addlasttoresourcelist(tempr);
+    }   
+    
+    temp = plist;
+    sum = tempresourcelist;
+    tempresourcelist = NULL;
+    tempr=NULL;
+    
+    
+    totalptr = totallist;
+    sumptr = sum;
+    while(totalptr!=NULL){
+        tempr = new resource;
+		tempr->next=NULL;
+		tempr->amount= totalptr->amount - sumptr->amount;
+		
+		addlasttoresourcelist(tempr);
+		totalptr=totalptr->next;
+		sumptr=sumptr->next;
+    }
+    freelist  = tempresourcelist;
+    tempresourcelist = NULL;
+    tempr = NULL;
+    
+    
+    int k = 0;
+    found = true;
+    while(found){
+        found = false;
+        temp = plist;
+        while(temp != NULL){
+    
+            resource *finishedptr = finishedlist;  
+            bool done = false;
+            while(finishedptr != NULL){
+                if(finishedptr->amount == temp->pid){  
+                    done = true;
+                    break;
+                }
+                finishedptr = finishedptr->next;
+            }
+    
+            if(!done){
+                availableptr = freelist;
+                needlistptr = temp->needlist;
+                bool good = true;
+                while(needlistptr != NULL){
+                    if(needlistptr->amount > availableptr->amount){
+                        good = false;
+                        break;
+                    }
+                    needlistptr = needlistptr->next;
+                    availableptr = availableptr->next;
+                }
+    
+                if(good){
+                    allocateptr = temp->allocatedlist;
+                    availableptr = freelist;
+                    while(allocateptr != NULL){
+                        tempr = new resource;
+                        tempr->next = NULL;
+                        tempr->amount = availableptr->amount + allocateptr->amount;
+                        addlasttoresourcelist(tempr);
+                        allocateptr = allocateptr->next;
+                        availableptr = availableptr->next;
+                    }
+                    freelist = tempresourcelist;
+                    tempresourcelist = NULL;
+    
+                    // mark finished
+                    resource *f = new resource;
+                    f->next = NULL;
+                    f->amount = temp->pid;
+                    if(finishedlist == NULL){
+                        finishedlist = f;
+                    }else{
+                        resource *ftemp = finishedlist;
+                        while(ftemp->next != NULL)
+                            ftemp = ftemp->next;
+                        ftemp->next = f;
+                    }
+                    k++;
+                    found = true;  
+                }
+            }
+            temp = temp->next; 
+        }
+    }
+    
+    if(k == y){
+        cout << "\nSAFE STATE";
+    }else{
+        cout << "\nUNSAFE STATE";
+    }
+}
 
 
 void initialize()
