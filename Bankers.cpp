@@ -60,6 +60,8 @@ int main()
 	process *temp;
 	resource *tempres;
 	initialize();
+	calculateneed();
+	safechecker(x);
 	temp=plist;
 	
 	cout<<"\nMax list\t\t"<<"Allocated list \t\t"<<"Need list";
@@ -93,7 +95,28 @@ int main()
 }
 
 
-
+void calculateneed(){
+	process *temp;
+	resource *tempr;
+	resource *maxptr;
+	resource *allocateptr;
+	temp = plist;
+	while(temp != NULL){
+		maxptr= temp->maxlist;
+		allocateptr=temp->allocatedlist;
+		while(maxptr!=NULL){
+			tempr = new resource;
+			tempr->next=NULL;
+			tempr->amount= maxptr->amount - allocateptr->amount;
+			addlasttoresourcelist(tempr);
+			maxptr=maxptr->next;
+			allocateptr=allocateptr->next;
+		}
+		temp->needlist=tempresourcelist;
+		tempresourcelist=NULL;
+		temp= temp->next;
+	}
+}
 
 
 
